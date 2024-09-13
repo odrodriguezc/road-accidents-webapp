@@ -1,0 +1,17 @@
+Method,Class,Count
+SMOTE,1,219223
+SMOTE,2,219223
+SMOTE,3,219223
+SMOTE,0,219223
+RandomOverSampler,1,219223
+RandomOverSampler,2,219223
+RandomOverSampler,3,219223
+RandomOverSampler,0,219223
+RandomUnderSampler,0,11028
+RandomUnderSampler,1,11028
+RandomUnderSampler,2,11028
+RandomUnderSampler,3,11028
+TomekLinks,2,164588
+TomekLinks,1,143053
+TomekLinks,0,44260
+TomekLinks,3,11028
