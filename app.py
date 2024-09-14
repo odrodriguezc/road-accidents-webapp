@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 import networkx as nx
+import io
 
 # Sidebar navigation
 st.sidebar.title("Navigation")
@@ -20,18 +21,28 @@ def introduction_render():
 
 
       # Introduction Text
+      st.write("### Contexte")
       st.write("""
-      ### Aperçu du projet
-      Ce projet se concentre sur [problème ou sujet spécifique], avec pour objectif d'explorer et d'analyser un ensemble de données, et de construire des modèles prédictifs pour résoudre [problème ou objectif].
-      
-      ### Objectifs :
-      1. **Comprendre le jeu de données** : Une analyse approfondie des caractéristiques du jeu de données, y compris ses sources, ses fonctionnalités et sa qualité.
-      2. **Analyse des données** : Explorer et visualiser les données pour découvrir des modèles, tendances et insights clés.
-      3. **Modélisation** : Construire des modèles d'apprentissage automatique pour résoudre le problème et évaluer leurs performances.
-      4. **Conclusions** : Résumer les résultats, les performances des modèles et proposer des étapes ou recommandations à suivre.
+           - Un accident est un phénomène complexe, 
+             en tant qu’usagers de la route et proches des services de transport, c'est plus qu'une curiosité pour nous.
+           
+           - Formation en data science : validation d'un projet
+              
+           Nous avons sollicité de travailler sur le projet « Accidents routiers en France »
+           """)
 
-      Cette application Streamlit vous guidera à travers ces sections, en commençant par les caractéristiques du jeu de données, pour ensuite passer à l'analyse et la construction de modèles.
-      """)
+  
+
+      st.write("### Objectifs")
+      st.write("""
+           - « Bases de données annuelles accidents corporels de la circulation routière » géré par l'ONISR  
+             « Fichier BAAC »,  de 2020 à 2022.
+           
+           - « Modèle de prédiction de la gravité des accidents routiers en France »,
+
+           - Se familiariser avec divers outils de data science :  jupyter notebook , git et git hub, Visual Studio Code, Spider … 
+           
+           """)
 
       # Workflow Diagram or Additional Context (optional)
       st.write("""
@@ -42,38 +53,119 @@ def introduction_render():
       - **Étape 4** : Conclusion et étapes suivantes.
       """)
 
+
+accidents_df = pd.read_csv("data/accidents_clean_full_qualitat.csv")
+# Nommons aa_df (analysing_accidents_dataframe) notre dataframe pour l'analyse 
+aa_df = accidents_df.drop(accidents_df.columns[1], axis=1)
+aa_df = aa_df.drop(aa_df.columns[0], axis=1)
+
 def dataset_render():
-    st.title("Dataset")
+    # Title of the Project
+      st.title("L'aquisition des données")      
+      st.write("""
+           Consolidation des principaux fichiers BAAC :  
+           
+            - Le fichier « caracteristiques.csv », 
+            - Le fichier « usagers.csv »,
+            - Le fichier « lieux.csv »,
+            - Le fichier « vehicules.csv ».
+
+
+           Traitement des données manquantes
+           
+           Elimination des variables non pertinentes,
+
+           Recodification des colonnes pour plus de lisibilités.
+                      """)
+      buffer = io.StringIO()
+      aa_df.info(buf=buffer)
+      s_aa_df = buffer.getvalue()
+      
+      st.text(s_aa_df)
+      
+      st.dataframe(aa_df.head()) 
 
 def analisys_render():
     # Title of the Project
-    st.title("Analysis ")
+    st.title("Exploration des données")
 
-    # Image (make sure the image is placed in the 'images' folder within the project directory)
-    st.image("images/accident.png", caption="Data Science Project Overview", use_column_width=True)
+    
 
     # Introduction Text
     st.write("""
-    ### Aperçu du projet
-    Ce projet se concentre sur [problème ou sujet spécifique], avec pour objectif d'explorer et d'analyser un ensemble de données, et de construire des modèles prédictifs pour résoudre [problème ou objectif].
+             Notre projet est basé sur des données récoltées sur le site de l'ONISR et les effectifs avancés vont concerner trois périodes allant de 2020 à 2022.
+
+            ### Gravité : la variable cible    
+              - Pour la variable « gravité », plus de 40% indemnes et 40% avec des blessures légères.
+              - Les accidents mortels sont de l’ordre de 2% et les hospitalisations dépassent les 10%. … 
     
-    ### Objectifs :
-    1. **Comprendre le jeu de données** : Une analyse approfondie des caractéristiques du jeu de données, y compris ses sources, ses fonctionnalités et sa qualité.
-    2. **Analyse des données** : Explorer et visualiser les données pour découvrir des modèles, tendances et insights clés.
-    3. **Modélisation** : Construire des modèles d'apprentissage automatique pour résoudre le problème et évaluer leurs performances.
-    4. **Conclusions** : Résumer les résultats, les performances des modèles et proposer des étapes ou recommandations à suivre.
+             """)
+    
+    fig = plt.figure(figsize = (10,6))
+    target = aa_df['gravite'].astype(int)
+    dikt_ord = {'Indemne' : '1- Indemne',
+            'Blessé léger' : '2- Blessé léger',
+            'Blessé hospitalisé' : '3- Blessé hospitalisé',
+            'Tué': '4 - Tué'}
+    aa_df['gravite_cat'] = aa_df['gravite_cat'].replace(dikt_ord)
+    ax = sns.countplot(data = aa_df.sort_values('gravite_cat', ascending = True), y = 'gravite_cat')
+    total = len(aa_df['gravite_cat'])
+    for p in ax.patches:
+        percentage = '{:.1f}%'.format(100 * p.get_width()/total)
+        x = p.get_x() + p.get_width() + 0.04
+        y = p.get_y() + p.get_height()/2
+        ax.annotate(percentage, (x, y))
 
-    Cette application Streamlit vous guidera à travers ces sections, en commençant par les caractéristiques du jeu de données, pour ensuite passer à l'analyse et la construction de modèles.
-    """)
-
-    # Workflow Diagram or Additional Context (optional)
+    plt.title("Distribution des categories de gravités")
+    st.pyplot(fig)   
+    
     st.write("""
-    ### Déroulement du projet
-    - **Étape 1** : Exploration et nettoyage des données.
-    - **Étape 2** : Analyse exploratoire des données (EDA).
-    - **Étape 3** : Construction et évaluation du modèle.
-    - **Étape 4** : Conclusion et étapes suivantes.
-    """)
+            ### Gravité / Sexe :
+              - Pour la variable « gravité », plus de 40% indemnes et 40% avec des blessures légères.
+              - Les accidents mortels sont de l’ordre de 2% et les hospitalisations dépassent les 10%. …     
+            """)
+    fig = plt.figure(figsize = (10,6))
+    target = aa_df['gravite'].astype(int)
+    sns.countplot(data = aa_df.sort_values('gravite_cat', ascending = True), x = 'gravite_cat', hue = 'sexe' )
+    plt.title("Gravites / sexe ")
+    st.pyplot(fig)
+    
+    st.write("""
+            ### Périodicités des accidents :
+              - 700 accidents / jours en moyenne.
+              - Décrochage en mars 2020, à moins de 200, "un effet confinement" lié à la pandémie covid 2019 …     
+            """)
+# Image (make sure the image is placed in the 'images' folder within the project directory)
+    st.image("images/06_Acc_par_jour.png", caption="Nombre d'accidents par jour", use_column_width=True)
+
+    st.write("""          
+              - Ces trois dernières années, + d'accidents en juillet et en septembre.
+              - Un peu plus calme en avril (encore un impact confinnement?)
+           """)
+
+    fig = plt.figure(figsize = (10,6))
+    sns.histplot(data=aa_df, x="mois", bins=12, palette = 'deep')
+    st.pyplot(fig)
+
+
+    st.write("""          
+           En semaine, on a une fréquence plus élévé le vendredi et ça baisse significativement le dimanche.
+           """)
+    st.image("images/08_Acc_par_jour_semaine.png", caption="Les accidents en semaine", use_column_width=True)
+
+
+    st.write("""
+             Concernant les horaires, le graphique suivant montre qu’on a moins d’accidents généralement de 3 à 4 heures du matin mais on constate deux pics : 
+              - à 8 heure du matin 35000 cas pour les 3 périodes.
+              - à 17h de l’après-midi 60 000 cas de 2020 à 2022.
+            """)
+    st.image("images/09_Acc_par_heure.png", caption="Les accidents en semaine", use_column_width=True)
+
+    st.write("""
+             Géographiquement, pas de concentration de type d’accidents sur une localité particulière. 
+             Il semble que la gravité des accidents est dispersée aléatoirement d’une manière générale. 
+            """)
+    st.image("images/10_Distri_Geo.png", caption="Les accidents en semaine", use_column_width=True)
 
 def modeling_render():
     # Titre principal de la page
@@ -620,6 +712,18 @@ def modeling_render():
 
 def conclusion_render():
     st.title("Conclusion")
+
+    st.write(""" Ce projet nous a permis de mettre en pratique plusieurs modèles d’intelligence artificiel. C'est une discipline qui nécessite de tester le maximum de modèles possible avec divers paramètres.
+Concretement, les methodes d'ensemble (Bagging Classifier, XGBoost) nous ont données résultats encourageants. Techniquement les temps d'apprentissage de ces modèles prennent du temps si on veut affiner le résultats et nous avons fait face aux limites de nos matériels.
+Concernant l'iterprétabilité des résultats, nous avons pu mettre en valeurs certaines variables déterminantes : 
+ - l'utilisation de la ceinture de sécurité, 
+ - la vitesse maximale autorisée, 
+ - la catégorie du véhicule, 
+ - la place occupée dans le véhicule. 
+
+En expérimentant ces techniques familières aux Datascientists, et compte tenu de la particularité de notre dataset « Accidents routiers en France », 
+nous avons obtenu un modèle robuste, mais il est bien sûr perfectible. Aussi, une meilleure connaissance métier, par un expert en assurance par exemple,
+apporterait sans doute une orientation plus judicieuse dans les choix des modèles de même qu'une vision et qu'une interprétation réaliste.""")
 
 
 # Page Routing
