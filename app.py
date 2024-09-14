@@ -1,4 +1,5 @@
 import json
+import zipfile
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -44,17 +45,21 @@ def introduction_render():
            
            """)
 
-      # Workflow Diagram or Additional Context (optional)
-      st.write("""
-      ### Déroulement du projet
-      - **Étape 1** : Exploration et nettoyage des données.
-      - **Étape 2** : Analyse exploratoire des données (EDA).
-      - **Étape 3** : Construction et évaluation du modèle.
-      - **Étape 4** : Conclusion et étapes suivantes.
-      """)
 
+# Path to your ZIP file
+zip_file_path = 'data/accidents_clean_full_qualitat.zip'
 
-accidents_df = pd.read_csv("data/accidents_clean_full_qualitat.csv")
+# Open the ZIP file
+with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+    # Find the name of the CSV file in the ZIP (assuming you know its name)
+    csv_filename = 'accidents_clean_full_qualitat.csv'
+    
+    # Open the CSV file inside the ZIP archive
+    with zip_ref.open(csv_filename) as csv_file:
+        # Read the CSV file into a DataFrame
+        df = pd.read_csv(csv_file)
+
+accidents_df = df
 # Nommons aa_df (analysing_accidents_dataframe) notre dataframe pour l'analyse 
 aa_df = accidents_df.drop(accidents_df.columns[1], axis=1)
 aa_df = aa_df.drop(aa_df.columns[0], axis=1)
@@ -454,29 +459,7 @@ def modeling_render():
 
     # Création du plot pour illustrer le regroupement des classes
     st.write("Visualisation du regroupement des classes :")
-
-    # Création du graphe
-    G = nx.DiGraph()
-
-    # Ajout des nouvelles classes
-    G.add_node("Accident grave", size=2)
-    G.add_node("Accident pas grave", size=2)
-
-    # Ajout des anciennes classes et des relations avec les nouvelles classes
-    G.add_edge("Tué", "Accident grave")
-    G.add_edge("Hospitalisé", "Accident grave")
-    G.add_edge("Indemne", "Accident pas grave")
-    G.add_edge("Blessé non hospitalisé", "Accident pas grave")
-
-    # Dessin du graphe
-    plt.figure(figsize=(8, 6))
-    pos = nx.spring_layout(G)
-
-    # Dessin des nœuds et des arêtes
-    nx.draw(G, pos, with_labels=True, node_color="lightblue", node_size=3000, font_size=10, font_weight="bold", arrows=True)
-
-    # Affichage du plot dans Streamlit
-    st.pyplot(plt)
+    st.image("images/dist_class_bin.png", caption="dist_target_binary")
 
     # Sous-section B: Rééchantillonnage (SMOTE)
     st.subheader("B. Rééchantillonnage avec SMOTE")
@@ -703,6 +686,7 @@ def modeling_render():
     st.write("Variables les plus importantes dans la prédiction:")
     # Graphe des variables les plus importantes
     st.image("images/shap_more_important.png", caption="")
+    st.image("images/dist_shap.png", caption="")
 
 
 
