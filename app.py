@@ -17,7 +17,7 @@ def introduction_render():
       st.title("Accidents routiers en France ")
 
       # Image (make sure the image is placed in the 'images' folder within the project directory)
-      st.image("images/accident.png", caption="Data Science Project Overview", use_column_width=True)
+      st.image("images/accident.png", caption="Source : « 20 Minutes », https://www.20minutes.fr/", use_column_width=True)
 
 
       # Introduction Text
